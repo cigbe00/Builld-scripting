@@ -1,0 +1,98 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+useage=": $0 [-t buildType] [-d builddir] [-w workspace] [-n name for tarball created] [-u git username] [-p git password] build script..."
+
+Script_location="$(dirname "$(readlink -f $0)")"
+
+GIT_URL="https://github.com/cigbe00/C-library.git"
+
+echo $Script_location
+
+
+while getopts ":ht:n:d:w:u:p:" Clinfo; do
+     case $Clinfo in
+             h )  echo "Help"
+                  echo $useage
+                  exit 1;;
+             
+             t )  echo "Build Type"
+                  buildtype="$OPTARG";;
+             
+ 	     n )  echo "Tarball name"
+                  tarball="$OPTARG";;
+
+             d )  echo "Build Directory"
+                  builddir="$OPTARG";;
+             
+             w )  echo "Workspace"
+                  workspace="$OPTARG";;             
+
+             u )  echo "git username"
+                  user="$OPTARG";;
+     
+             p )  echo "Password"
+                  pass="$OPTARG";;
+                   
+            \? )  echo "No option provided!!"
+                  echo $useage
+                  exit 1;;                 
+     esac
+done
+shift $(($OPTIND - 1))
+
+if [ -z ${buildtype} ]
+
+ then 
+      echo "Build type is a required option but is empty"
+      exit 1
+fi
+
+if [ -z ${builddir} ]
+
+ then 
+      echo "Build Directory is a required option but is empty"
+      exit 1
+fi
+
+if [ -z ${workspace} ]
+
+ then 
+      echo "Workspace is a required options but is empty"
+      exit 1
+fi
+
+if [ -z ${tarball} ]
+
+ then 
+      echo "Tarball parameter is a required option but is empty"
+      exit 1
+fi
+
+if [[ -z ${user} ]] || [[ -z ${pass} ]]
+
+ then 
+      echo "Github user or password not required for this script, so continue!!"
+      
+fi
+
+cd ${Script_location}
+pwd
+
+
+if [ -d ${builddir} ]
+then
+      rm -rf ${builddir}
+fi
+mkdir -p ${builddir}
+cp learningC.c ${Script_location}/${builddir}
+cd ${builddir}
+
+gcc -o learn learningC.c
+
+./learn
+
+tar -cvzf ${tarball}.tgz.gz learn
+
